@@ -119,8 +119,8 @@ document.getElementById("analyze-btn").addEventListener("click", async () => {
 
     statusEl.textContent = "Готово — результат появится виджетом на странице вакансии.";
   } catch (e) {
-    statusEl.textContent =
-      "Не удалось проанализировать эту вкладку. Откройте обычную страницу вакансии в браузере (не служебную chrome:// страницу) и попробуйте снова.";
+    console.error("JobRate analyze-btn error:", e);
+    statusEl.textContent = `Ошибка: ${e.message || e}`;
   }
 });
 
