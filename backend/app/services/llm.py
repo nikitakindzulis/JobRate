@@ -98,4 +98,16 @@ def match_job(profile_skills: list[dict], job_text: str) -> dict:
         ],
         output_format=JobMatch,
     )
-    return response.parsed_output.model_dump()
+    result = response.parsed_output.model_dump()
+
+    # match_percent модель генерирует отдельно от списков matched/missing —
+    # это может давать нелогичные расхождения (например, 95% при пустом
+    # missing_skills). Пересчитываем процент напрямую из списков, которые
+    # модель уже составила, чтобы цифра всегда была с ними согласована.
+    matched_count = len(result["matched_skills"])
+    missing_count = len(result["missing_skills"])
+    total = matched_count + missing_count
+    if total > 0:
+        result["match_percent"] = round(matched_count / total * 100)
+
+    return result
