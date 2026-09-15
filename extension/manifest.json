@@ -3,7 +3,7 @@
   "name": "JobRate — оценка вакансий",
   "version": "0.1.0",
   "description": "Показывает, насколько вакансия соответствует вашим навыкам из резюме",
-  "permissions": ["storage"],
+  "permissions": ["storage", "activeTab"],
   "host_permissions": [
     "http://localhost:8000/*",
     "http://127.0.0.1:8000/*"

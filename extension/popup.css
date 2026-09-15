@@ -78,6 +78,23 @@ input[type="file"] {
   cursor: pointer;
 }
 
+.analyze-btn {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 8px;
+  background: #7c5cff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.analyze-btn:hover {
+  background: #6a4ce0;
+}
+
 .status {
   min-height: 16px;
   color: #7c5cff;

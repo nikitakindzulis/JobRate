@@ -2,12 +2,21 @@ const JOB_KEYWORDS = [
   "responsibilities",
   "requirements",
   "qualifications",
+  "what you bring",
+  "what you'll do",
+  "you will",
+  "nice to have",
+  "we are looking for",
+  "we're looking for",
   "обязанности",
   "требования",
   "условия",
   "вакансия",
   "зарплата",
+  "мы ищем",
 ];
+
+let overlayEl = null;
 
 function looksLikeJobPage() {
   const text = document.body.innerText.toLowerCase();
@@ -15,7 +24,7 @@ function looksLikeJobPage() {
   for (const kw of JOB_KEYWORDS) {
     if (text.includes(kw)) hits++;
   }
-  return hits >= 2 && text.length > 500;
+  return hits >= 1 && text.length > 500;
 }
 
 function extractJobText() {
@@ -36,6 +45,7 @@ function extractJobText() {
 }
 
 function createOverlay() {
+  if (overlayEl) return overlayEl;
   const el = document.createElement("div");
   el.id = "jobrate-overlay";
   el.innerHTML = `
@@ -46,7 +56,11 @@ function createOverlay() {
     <div id="jobrate-body">Анализируем вакансию...</div>
   `;
   document.body.appendChild(el);
-  el.querySelector("#jobrate-close").addEventListener("click", () => el.remove());
+  el.querySelector("#jobrate-close").addEventListener("click", () => {
+    el.remove();
+    overlayEl = null;
+  });
+  overlayEl = el;
   return el;
 }
 
@@ -73,15 +87,21 @@ function renderError(el, message) {
   el.querySelector("#jobrate-body").innerHTML = `<p class="jobrate-error">${message}</p>`;
 }
 
-(async function init() {
-  if (!looksLikeJobPage()) return;
-
+async function runAnalysis() {
   const profileResp = await chrome.runtime.sendMessage({ type: "GET_PROFILE" });
-  if (!profileResp.ok || !profileResp.data.skills || profileResp.data.skills.length === 0) {
-    return; // профиль не заполнен — виджет не показываем
+  if (!profileResp.ok) {
+    const el = createOverlay();
+    renderError(el, profileResp.error);
+    return;
+  }
+  if (!profileResp.data.skills || profileResp.data.skills.length === 0) {
+    const el = createOverlay();
+    renderError(el, "Профиль пуст — сначала загрузите резюме в попапе расширения.");
+    return;
   }
 
   const overlay = createOverlay();
+  overlay.querySelector("#jobrate-body").innerHTML = "Анализируем вакансию...";
   const jobText = extractJobText();
 
   const result = await chrome.runtime.sendMessage({
@@ -95,5 +115,20 @@ function renderError(el, message) {
     renderResult(overlay, result.data);
   } else {
     renderError(overlay, result.error);
+  }
+}
+
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message.type === "FORCE_ANALYZE") {
+    runAnalysis();
+    sendResponse({ ok: true });
+    return true;
+  }
+  return false;
+});
+
+(function init() {
+  if (looksLikeJobPage()) {
+    runAnalysis();
   }
 })();

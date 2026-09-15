@@ -96,6 +96,20 @@ document.getElementById("backend-url").addEventListener("change", async (e) => {
   await chrome.storage.local.set({ backendUrl: e.target.value });
 });
 
+document.getElementById("analyze-btn").addEventListener("click", async () => {
+  const statusEl = document.getElementById("status");
+  statusEl.textContent = "Отправляем запрос на анализ страницы...";
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab?.id) throw new Error("Не удалось определить активную вкладку");
+    await chrome.tabs.sendMessage(tab.id, { type: "FORCE_ANALYZE" });
+    statusEl.textContent = "Готово — результат появится виджетом на странице вакансии.";
+  } catch (e) {
+    statusEl.textContent =
+      "Не удалось связаться со страницей. Обновите вкладку с вакансией (F5) и попробуйте снова.";
+  }
+});
+
 (async function initPopup() {
   document.getElementById("backend-url").value = await getBaseUrl();
   await loadProfile();
