@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from .. import models
 from ..database import get_db
 from ..schemas import MatchRequest, MatchResult
-from ..services.llm import match_job
+from ..services.matcher import compute_match
 from ..services.profile_service import get_or_create_profile
 
 router = APIRouter(prefix="/api", tags=["match"])
@@ -20,7 +20,7 @@ def match(payload: MatchRequest, db: Session = Depends(get_db)):
     if not payload.job_text.strip():
         raise HTTPException(status_code=400, detail="Пустой текст вакансии")
 
-    result = match_job(skill_names, payload.job_text)
+    result = compute_match(skill_names, payload.job_text)
 
     history = models.MatchHistory(
         job_url=payload.job_url,

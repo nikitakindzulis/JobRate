@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from .. import models
 from ..database import get_db
 from ..schemas import ProfileOut
-from ..services.llm import extract_skills
+from ..services.matcher import extract_skills_from_resume
 from ..services.profile_service import get_or_create_profile
 from ..services.resume_parser import extract_text
 
@@ -23,7 +23,7 @@ async def upload_cv(file: UploadFile = File(...), db: Session = Depends(get_db))
     if not text.strip():
         raise HTTPException(status_code=400, detail="Не удалось извлечь текст из файла")
 
-    extracted = extract_skills(text)
+    extracted = extract_skills_from_resume(text)
 
     profile = get_or_create_profile(db)
     profile.raw_resume = text
