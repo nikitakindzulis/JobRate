@@ -96,17 +96,31 @@ document.getElementById("backend-url").addEventListener("change", async (e) => {
   await chrome.storage.local.set({ backendUrl: e.target.value });
 });
 
+async function injectContentScript(tabId) {
+  await chrome.scripting.insertCSS({ target: { tabId }, files: ["overlay.css"] });
+  await chrome.scripting.executeScript({ target: { tabId }, files: ["content.js"] });
+}
+
 document.getElementById("analyze-btn").addEventListener("click", async () => {
   const statusEl = document.getElementById("status");
   statusEl.textContent = "Отправляем запрос на анализ страницы...";
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab?.id) throw new Error("Не удалось определить активную вкладку");
-    await chrome.tabs.sendMessage(tab.id, { type: "FORCE_ANALYZE" });
+
+    try {
+      await chrome.tabs.sendMessage(tab.id, { type: "FORCE_ANALYZE" });
+    } catch (e) {
+      // Content script ещё не внедрён в эту вкладку (например, страница была
+      // открыта до перезагрузки расширения) — внедряем вручную и пробуем снова.
+      await injectContentScript(tab.id);
+      await chrome.tabs.sendMessage(tab.id, { type: "FORCE_ANALYZE" });
+    }
+
     statusEl.textContent = "Готово — результат появится виджетом на странице вакансии.";
   } catch (e) {
     statusEl.textContent =
-      "Не удалось связаться со страницей. Обновите вкладку с вакансией (F5) и попробуйте снова.";
+      "Не удалось проанализировать эту вкладку. Откройте обычную страницу вакансии в браузере (не служебную chrome:// страницу) и попробуйте снова.";
   }
 });
 
