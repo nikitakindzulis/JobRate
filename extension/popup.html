@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <title>JobRate</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <h1>JobRate</h1>
+
+    <section>
+      <label class="upload-label" for="cv-upload">Загрузить резюме (PDF / DOCX / TXT)</label>
+      <input type="file" id="cv-upload" accept=".pdf,.docx,.txt" />
+    </section>
+
+    <p id="summary" class="summary"></p>
+
+    <section>
+      <div class="skills-header">Ваши навыки</div>
+      <ul id="skills-list"></ul>
+      <div class="add-skill-row">
+        <input type="text" id="new-skill" placeholder="Добавить навык вручную" />
+        <button id="add-skill-btn">+</button>
+      </div>
+    </section>
+
+    <p id="status" class="status"></p>
+
+    <details class="settings">
+      <summary>Настройки</summary>
+      <label for="backend-url">URL бэкенда</label>
+      <input type="text" id="backend-url" placeholder="http://localhost:8000" />
+    </details>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

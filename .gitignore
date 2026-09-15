@@ -1,0 +1,11 @@
+# Python
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+*.pyc
+backend/.env
+backend/jobrate.db
+
+# OS
+.DS_Store
+Thumbs.db
