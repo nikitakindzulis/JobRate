@@ -13,14 +13,14 @@ router = APIRouter(prefix="/api", tags=["match"])
 @router.post("/match", response_model=MatchResult)
 def match(payload: MatchRequest, db: Session = Depends(get_db)):
     profile = get_or_create_profile(db)
-    skill_names = [s.name for s in profile.skills]
-    if not skill_names:
+    profile_skills = [{"name": s.name, "level": s.level} for s in profile.skills]
+    if not profile_skills:
         raise HTTPException(status_code=400, detail="Сначала загрузите резюме в профиле")
 
     if not payload.job_text.strip():
         raise HTTPException(status_code=400, detail="Пустой текст вакансии")
 
-    result = match_job(skill_names, payload.job_text)
+    result = match_job(profile_skills, payload.job_text)
 
     history = models.MatchHistory(
         job_url=payload.job_url,
