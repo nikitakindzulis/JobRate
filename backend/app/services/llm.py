@@ -1,0 +1,78 @@
+from typing import Optional
+
+import anthropic
+from pydantic import BaseModel
+
+from ..config import settings
+
+# Если ключ не задан в .env — падаем на стандартное разрешение SDK
+# (ANTHROPIC_API_KEY из окружения, либо профиль `ant auth login`).
+_client = (
+    anthropic.Anthropic(api_key=settings.anthropic_api_key)
+    if settings.anthropic_api_key
+    else anthropic.Anthropic()
+)
+
+
+class ExtractedSkill(BaseModel):
+    name: str
+    level: Optional[str] = None  # junior / middle / senior / expert / unknown
+
+
+class ResumeExtraction(BaseModel):
+    skills: list[ExtractedSkill]
+    summary: str
+
+
+class JobMatch(BaseModel):
+    match_percent: int
+    matched_skills: list[str]
+    missing_skills: list[str]
+    nice_to_have: list[str] = []
+    summary: str
+
+
+def extract_skills(resume_text: str) -> dict:
+    response = _client.messages.parse(
+        model=settings.anthropic_model,
+        max_tokens=2048,
+        messages=[
+            {
+                "role": "user",
+                "content": (
+                    "Вот текст резюме кандидата. Извлеки список его навыков "
+                    "(технических и профессиональных) и краткое summary опыта "
+                    "на русском, 1-2 предложения.\n\n" + resume_text[:15000]
+                ),
+            }
+        ],
+        output_format=ResumeExtraction,
+    )
+    result = response.parsed_output
+    return {
+        "skills": [{"name": s.name, "level": s.level} for s in result.skills],
+        "summary": result.summary,
+    }
+
+
+def match_job(profile_skills: list[str], job_text: str) -> dict:
+    skills_str = ", ".join(profile_skills)
+    response = _client.messages.parse(
+        model=settings.anthropic_model,
+        max_tokens=2048,
+        messages=[
+            {
+                "role": "user",
+                "content": (
+                    f"Навыки кандидата: {skills_str}\n\n"
+                    f"Текст вакансии:\n{job_text[:15000]}\n\n"
+                    "Оцени в процентах, насколько кандидат подходит под эту вакансию. "
+                    "Укажи, какие из его навыков совпадают с требованиями, каких навыков "
+                    "из вакансии ему не хватает, и какие требования упомянуты как "
+                    "желательные, но не обязательные. Ответ пиши на русском."
+                ),
+            }
+        ],
+        output_format=JobMatch,
+    )
+    return response.parsed_output.model_dump()
