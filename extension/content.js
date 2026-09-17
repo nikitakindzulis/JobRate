@@ -51,9 +51,9 @@ function createOverlay() {
   el.innerHTML = `
     <div id="jobrate-header">
       <span>JobRate</span>
-      <button id="jobrate-close" title="Закрыть">×</button>
+      <button id="jobrate-close" title="Close">×</button>
     </div>
-    <div id="jobrate-body">Анализируем вакансию...</div>
+    <div id="jobrate-body">Analyzing job posting...</div>
   `;
   document.body.appendChild(el);
   el.querySelector("#jobrate-close").addEventListener("click", () => {
@@ -76,9 +76,9 @@ function renderResult(el, data) {
   body.innerHTML = `
     <div class="jobrate-percent">${data.match_percent}%</div>
     <p class="jobrate-summary">${data.summary}</p>
-    <div class="jobrate-section-title">Есть у вас</div>
+    <div class="jobrate-section-title">You have</div>
     <div class="jobrate-badges">${matchedHtml}</div>
-    <div class="jobrate-section-title">Не хватает</div>
+    <div class="jobrate-section-title">Missing</div>
     <div class="jobrate-badges">${missingHtml}</div>
   `;
 }
@@ -96,12 +96,12 @@ async function runAnalysis() {
   }
   if (!profileResp.data.skills || profileResp.data.skills.length === 0) {
     const el = createOverlay();
-    renderError(el, "Профиль пуст — сначала загрузите резюме в попапе расширения.");
+    renderError(el, "Your profile is empty — upload a resume in the extension popup first.");
     return;
   }
 
   const overlay = createOverlay();
-  overlay.querySelector("#jobrate-body").innerHTML = "Анализируем вакансию...";
+  overlay.querySelector("#jobrate-body").innerHTML = "Analyzing job posting...";
   const jobText = extractJobText();
 
   const result = await chrome.runtime.sendMessage({

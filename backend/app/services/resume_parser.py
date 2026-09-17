@@ -28,7 +28,7 @@ def _extract_docx(content: bytes) -> str:
 def extract_text(filename: str, content: bytes) -> str:
     """Достаёт текст резюме из PDF/DOCX/TXT. Бросает ValueError на неподдерживаемых форматах."""
     if not filename or "." not in filename:
-        raise ValueError("Не удалось определить формат файла")
+        raise ValueError("Could not determine the file format")
 
     ext = filename.rsplit(".", 1)[-1].lower()
 
@@ -40,5 +40,5 @@ def extract_text(filename: str, content: bytes) -> str:
         return content.decode("utf-8", errors="ignore")
 
     raise ValueError(
-        f"Формат .{ext} не поддерживается. Загрузите PDF, DOCX или TXT"
+        f"The .{ext} format is not supported. Please upload a PDF, DOCX, or TXT file."
     )

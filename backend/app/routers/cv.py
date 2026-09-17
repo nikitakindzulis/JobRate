@@ -21,7 +21,7 @@ async def upload_cv(file: UploadFile = File(...), db: Session = Depends(get_db))
         raise HTTPException(status_code=400, detail=str(e))
 
     if not text.strip():
-        raise HTTPException(status_code=400, detail="Не удалось извлечь текст из файла")
+        raise HTTPException(status_code=400, detail="Could not extract text from the file")
 
     extracted = extract_skills(text)
 

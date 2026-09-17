@@ -14,7 +14,7 @@ async function apiMatch(jobText, jobUrl, jobTitle) {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || `Ошибка сервера: ${res.status}`);
+    throw new Error(err.detail || `Server error: ${res.status}`);
   }
   return res.json();
 }
@@ -23,7 +23,7 @@ async function apiGetProfile() {
   const baseUrl = await getBaseUrl();
   const res = await fetch(`${baseUrl}/api/profile`);
   if (!res.ok) {
-    throw new Error("Не удалось получить профиль. Проверьте, что бэкенд запущен");
+    throw new Error("Could not load profile. Make sure the backend is running.");
   }
   return res.json();
 }

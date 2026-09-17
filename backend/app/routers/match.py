@@ -15,10 +15,10 @@ def match(payload: MatchRequest, db: Session = Depends(get_db)):
     profile = get_or_create_profile(db)
     profile_skills = [{"name": s.name, "level": s.level} for s in profile.skills]
     if not profile_skills:
-        raise HTTPException(status_code=400, detail="Сначала загрузите резюме в профиле")
+        raise HTTPException(status_code=400, detail="Please upload your resume first")
 
     if not payload.job_text.strip():
-        raise HTTPException(status_code=400, detail="Пустой текст вакансии")
+        raise HTTPException(status_code=400, detail="Job description text is empty")
 
     result = match_job(profile_skills, payload.job_text)
 

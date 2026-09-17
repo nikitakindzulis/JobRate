@@ -1,36 +1,45 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <title>JobRate</title>
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
-    <h1>JobRate</h1>
+    <header class="app-header">
+      <div class="app-icon">JR</div>
+      <div>
+        <h1>JobRate</h1>
+        <p class="tagline">Match your resume to any job</p>
+      </div>
+    </header>
 
-    <section>
-      <label class="upload-label" for="cv-upload">Загрузить резюме (PDF / DOCX / TXT)</label>
-      <input type="file" id="cv-upload" accept=".pdf,.docx,.txt" />
+    <section class="card">
+      <div class="card-title">Resume</div>
+      <label class="file-upload" for="cv-upload">
+        <span class="file-upload-btn">Choose file</span>
+        <span id="file-name" class="file-name">No file chosen</span>
+      </label>
+      <input type="file" id="cv-upload" accept=".pdf,.docx,.txt" hidden />
+      <p id="summary" class="summary"></p>
     </section>
 
-    <p id="summary" class="summary"></p>
-
-    <section>
-      <div class="skills-header">Ваши навыки</div>
-      <ul id="skills-list"></ul>
+    <section class="card">
+      <div class="card-title">Your skills</div>
+      <div id="skills-list" class="skills-chips"></div>
       <div class="add-skill-row">
-        <input type="text" id="new-skill" placeholder="Добавить навык вручную" />
-        <button id="add-skill-btn">+</button>
+        <input type="text" id="new-skill" placeholder="Add a skill manually" />
+        <button id="add-skill-btn" title="Add">+</button>
       </div>
     </section>
 
-    <button id="analyze-btn" class="analyze-btn">Проверить эту вакансию</button>
+    <button id="analyze-btn" class="analyze-btn">Check this job posting</button>
 
     <p id="status" class="status"></p>
 
     <details class="settings">
-      <summary>Настройки</summary>
-      <label for="backend-url">URL бэкенда</label>
+      <summary>Settings</summary>
+      <label for="backend-url">Backend URL</label>
       <input type="text" id="backend-url" placeholder="http://localhost:8000" />
     </details>
 

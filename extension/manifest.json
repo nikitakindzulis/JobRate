@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "JobRate — оценка вакансий",
+  "name": "JobRate — Job Match Checker",
   "version": "0.1.0",
-  "description": "Показывает, насколько вакансия соответствует вашим навыкам из резюме",
+  "description": "Shows how well a job posting matches the skills in your resume",
   "permissions": ["storage", "activeTab", "scripting"],
   "host_permissions": [
     "http://localhost:8000/*",

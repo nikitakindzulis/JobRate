@@ -9,16 +9,20 @@ function renderSkills(skills) {
   const list = document.getElementById("skills-list");
   list.innerHTML = "";
   skills.forEach((s) => {
-    const li = document.createElement("li");
+    const chip = document.createElement("div");
+    chip.className = "skill-chip";
+
     const label = document.createElement("span");
     label.textContent = s.name + (s.level && s.level !== "unknown" ? ` (${s.level})` : "");
+
     const del = document.createElement("button");
     del.textContent = "×";
-    del.title = "Удалить";
+    del.title = "Remove";
     del.addEventListener("click", () => removeSkill(s.name, skills));
-    li.appendChild(label);
-    li.appendChild(del);
-    list.appendChild(li);
+
+    chip.appendChild(label);
+    chip.appendChild(del);
+    list.appendChild(chip);
   });
 }
 
@@ -43,13 +47,13 @@ async function loadProfile() {
   const baseUrl = await getBaseUrl();
   try {
     const res = await fetch(`${baseUrl}/api/profile`);
-    if (!res.ok) throw new Error("Сервер недоступен");
+    if (!res.ok) throw new Error("Server unavailable");
     const data = await res.json();
     renderSkills(data.skills);
     document.getElementById("summary").textContent = data.summary || "";
     statusEl.textContent = "";
   } catch (e) {
-    statusEl.textContent = `Бэкенд недоступен: ${e.message}`;
+    statusEl.textContent = `Backend unavailable: ${e.message}`;
   }
 }
 
@@ -68,10 +72,11 @@ document.getElementById("add-skill-btn").addEventListener("click", async () => {
 
 document.getElementById("cv-upload").addEventListener("change", async (e) => {
   const file = e.target.files[0];
+  document.getElementById("file-name").textContent = file ? file.name : "No file chosen";
   if (!file) return;
 
   const statusEl = document.getElementById("status");
-  statusEl.textContent = "Анализируем резюме...";
+  statusEl.textContent = "Analyzing resume...";
 
   const baseUrl = await getBaseUrl();
   const formData = new FormData();
@@ -81,14 +86,14 @@ document.getElementById("cv-upload").addEventListener("change", async (e) => {
     const res = await fetch(`${baseUrl}/api/cv`, { method: "POST", body: formData });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.detail || `Ошибка ${res.status}`);
+      throw new Error(err.detail || `Error ${res.status}`);
     }
     const data = await res.json();
     renderSkills(data.skills);
     document.getElementById("summary").textContent = data.summary || "";
-    statusEl.textContent = "Готово!";
+    statusEl.textContent = "Done!";
   } catch (err) {
-    statusEl.textContent = `Ошибка: ${err.message}`;
+    statusEl.textContent = `Error: ${err.message}`;
   }
 });
 
@@ -103,24 +108,24 @@ async function injectContentScript(tabId) {
 
 document.getElementById("analyze-btn").addEventListener("click", async () => {
   const statusEl = document.getElementById("status");
-  statusEl.textContent = "Отправляем запрос на анализ страницы...";
+  statusEl.textContent = "Sending analysis request...";
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (!tab?.id) throw new Error("Не удалось определить активную вкладку");
+    if (!tab?.id) throw new Error("Could not determine the active tab");
 
     try {
       await chrome.tabs.sendMessage(tab.id, { type: "FORCE_ANALYZE" });
     } catch (e) {
-      // Content script ещё не внедрён в эту вкладку (например, страница была
-      // открыта до перезагрузки расширения) — внедряем вручную и пробуем снова.
+      // Content script isn't injected into this tab yet (e.g. the page was
+      // open before the extension was reloaded) — inject it and retry.
       await injectContentScript(tab.id);
       await chrome.tabs.sendMessage(tab.id, { type: "FORCE_ANALYZE" });
     }
 
-    statusEl.textContent = "Готово — результат появится виджетом на странице вакансии.";
+    statusEl.textContent = "Done — the result will appear as a widget on the job page.";
   } catch (e) {
     console.error("JobRate analyze-btn error:", e);
-    statusEl.textContent = `Ошибка: ${e.message || e}`;
+    statusEl.textContent = `Error: ${e.message || e}`;
   }
 });
 
