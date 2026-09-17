@@ -5,6 +5,8 @@ backend/**/__pycache__/
 *.pyc
 backend/.env
 backend/jobrate.db
+backend/.pytest_cache/
+.pytest_cache/
 
 # OS
 .DS_Store
